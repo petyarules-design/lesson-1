@@ -30,4 +30,24 @@ module mux_4_1
   // using two instances of mux_4_1_width_2 with 2-bit data
 
 
+  mux_4_1_width_2 mux_h (
+    .d0(d0[3:2]),
+    .d1(d1[3:2]),
+    .d2(d2[3:2]),
+    .d3(d3[3:2]),
+    .sel(sel),
+    .y(y[3:2])
+  );
+
+  mux_4_1_width_2 mux_l (
+    .d0(d0[1:0]),
+    .d1(d1[1:0]),
+    .d2(d2[1:0]),
+    .d3(d3[1:0]),
+    .sel(sel),
+    .y(y[1:0])
+  );
+
+
+
 endmodule
