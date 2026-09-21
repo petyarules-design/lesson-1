@@ -122,8 +122,8 @@ module testbench;
         `ifdef __ICARUS__
             // Uncomment the following line
             // to generate a VCD file and analyze it using GTKwave or Surfer
-
-            // $dumpvars;
+            $dumpfile("dump7.vcd");
+            $dumpvars;
         `endif
 
         { serial_valid, serial_data } <= '0;

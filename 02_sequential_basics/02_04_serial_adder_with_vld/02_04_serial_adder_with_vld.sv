@@ -29,5 +29,22 @@ module serial_adder_with_vld
   //
   // When rst is high, the module should reset its internal state.
 
+   logic c_in, c_out;
+
+  assign sum = a ^ b ^ c_in;
+  assign c_out = (a & b) | (c_in & (a ^ b));
+
+  always_ff @ (posedge clk) 
+    if (rst)
+      c_in <= '0;
+    else if (vld == 1) begin
+      if (last == 0)
+        c_in <= c_out;
+      else c_in <= '0;
+    end
+      
+
+    
+
 
 endmodule
