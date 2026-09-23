@@ -28,6 +28,9 @@ module serial_to_parallel
     // Check the waveform diagram in the README for better understanding.
 
     logic [3:0] counter;
+    logic [7:0] parallel_data_1;
+
+    assign parallel_data = {serial_data, parallel_data_1[7:1]};
 
     always_comb begin 
         if (counter == 7 & serial_valid)
@@ -38,11 +41,11 @@ module serial_to_parallel
 
     always_ff @(posedge clk) begin
         if (rst) begin
-            parallel_data <= '0;
+            parallel_data_1 <= '0;
             counter <= '0;
         end
         else if (serial_valid) begin
-            parallel_data <= {parallel_data[6:0], serial_data};
+            parallel_data_1 <= {serial_data, parallel_data_1[7:1]};
             if (counter == 7) 
                 counter <= '0;
             else 
