@@ -85,6 +85,43 @@ module sort_three_floats (
     //
     // The FLEN parameter is defined in the "import/preprocessed/cvw/config-shared.vh" file
     // and usually equal to the bit width of the double-precision floating-point number, FP64, 64 bits.
+    logic le01, le12, le01_2;
+    logic err0, err1, err2;
+    logic [FLEN - 1:0] min01, max01, min12, max12;
+
+    f_less_or_equal i0 (
+        .a   (unsorted[0]),
+        .b   (unsorted[1]),
+        .res (le01),
+        .err (err0)
+    );
+
+    assign min01 = le01 ? unsorted[0] : unsorted[1];
+    assign max01 = le01 ? unsorted[1] : unsorted[0];
+
+    f_less_or_equal i1 (
+        .a   (max01),
+        .b   (unsorted[2]),
+        .res (le12),
+        .err (err1)
+    );
+
+    assign min12 = le12 ? max01 : unsorted[2];
+    assign max12 = le12 ? unsorted[2] : max01;
+
+    f_less_or_equal i2 (
+        .a   (min01),
+        .b   (min12),
+        .res (le01_2),
+        .err (err2)
+    );
+
+    assign sorted[0] = le01_2 ? min01 : min12;
+    assign sorted[1] = le01_2 ? min12 : min01;
+    assign sorted[2] = max12;
+
+    assign err = err0 | err1 | err2;
+
 
 
 endmodule
