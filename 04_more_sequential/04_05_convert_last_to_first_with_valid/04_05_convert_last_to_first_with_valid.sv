@@ -23,6 +23,20 @@ module conv_last_to_first
     // to the 'first' output status signal.
     //
     // See README for full description of the task with timing diagram.
+    logic flag;
+
+    assign down_valid = up_valid;
+    assign down_data = up_data;
+    assign down_first = up_valid & flag;
+
+    always_ff @(posedge clock) begin
+        if(reset)
+        flag <= 1;
+        else if (up_last)
+            flag <= 1;
+            else if (down_first)
+            flag <= 0;
+    end
 
 
 endmodule

@@ -24,6 +24,30 @@ module double_tokens
     // Example:
     // a -> 10010011000110100001100100
     // b -> 11011011110111111001111110
+    logic [7:0] counter;
+    logic [7:0] chg;
+
+    assign b = a | (chg > 0);
+
+    always_ff @( posedge clk ) begin 
+        if (rst) begin
+            counter <= 0;
+            chg <= 0;
+            overflow <=0;
+        end
+        else
+        if (a) begin
+            counter <= counter + 1;
+            chg <= chg +1;
+        end
+        else  begin counter <= 0;
+        if (chg > 0) chg <= chg - 1;
+        end
+        if (counter > 200)
+            overflow <= 1;
+    end
+
+        
 
 
 endmodule
