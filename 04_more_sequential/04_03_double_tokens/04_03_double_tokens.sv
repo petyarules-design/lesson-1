@@ -29,25 +29,31 @@ module double_tokens
 
     assign b = a | (chg > 0);
 
-    always_ff @( posedge clk ) begin 
-        if (rst) begin
+    always_ff @(posedge clk) begin
+        if (rst)
             counter <= 0;
-            chg <= 0;
-            overflow <=0;
-        end
-        else
-        if (a) begin
+        else if (a)
             counter <= counter + 1;
-            chg <= chg +1;
-        end
-        else  begin counter <= 0;
-        if (chg > 0) chg <= chg - 1;
-        end
-        if (counter > 200)
+        else
+            counter <= 0;
+    end
+
+    always_ff @(posedge clk) begin
+        if (rst)
+            chg <= 0;
+        else if (a)
+            chg <= chg + 1;
+        else if (chg > 0)
+            chg <= chg - 1;
+    end
+
+    always_ff @(posedge clk) begin
+        if (rst)
+            overflow <= 0;
+        else if (counter > 200)
             overflow <= 1;
     end
 
-        
 
 
 endmodule

@@ -52,11 +52,18 @@ module signed_or_unsigned_mul
   input                signed_mul,
   output logic [2 * n - 1:0] res
 );
+    
+    
+    logic signed [n:0]     a_1, b_1;
+    logic signed [2*n+1:0] product;
 
-  always_comb 
-    if (signed_mul)
-      res = $signed(a)*$signed(b);
-      else
-        res = a*b;
+    always_comb begin
+        a_1 = signed_mul ? {a[n-1], a} : {1'b0, a};
+        b_1 = signed_mul ? {b[n-1], b} : {1'b0, b};
+        product = a_1 * b_1;
+        res = product[2*n-1:0];
+    end
+
+
 
 endmodule

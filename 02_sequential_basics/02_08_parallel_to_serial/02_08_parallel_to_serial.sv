@@ -35,7 +35,7 @@ module parallel_to_serial
     assign serial_valid = parallel_valid | busy;
 
  
-    assign serial_data = (parallel_data[0] & parallel_valid & ~busy) | (stored_data[counter] & busy);
+    assign serial_data = busy ? stored_data[0] : (parallel_valid ? parallel_data[0] : 1'b0);
 
     always_ff @(posedge clk) begin
         if (rst) begin
@@ -44,15 +44,16 @@ module parallel_to_serial
             busy <= '0;
         end
         else if (parallel_valid && !busy) begin
-            stored_data <= parallel_data;   
+            stored_data <= parallel_data >> 1;   
             counter <= 1;               
             busy <= 1;       
         end
         else if (busy) begin
-            if (counter == 7)       
-                busy <= 0;             
+            stored_data <= stored_data >> 1; 
+            if (counter == 7)                
+                busy <= 0;
             else
-                counter <= counter + 1;     
+                counter <= counter + 1;
         end
     end
 

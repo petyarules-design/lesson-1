@@ -24,7 +24,7 @@ module halve_tokens
 
     always_ff @(posedge clk) 
         if(rst)
-            chng <= 0;
+            chng <= 0;//код будет работать правильно, тк chng изначально висит в 0, поэтому первую единичку мы выкинем.
         else 
         if (a)
             chng <= ~ chng;

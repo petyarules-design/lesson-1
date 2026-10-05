@@ -41,7 +41,7 @@ module signed_add_with_saturation
 
   logic overflow;
 
-  assign  overflow = (a[3]&b[3]&(~sum_check[3]))|(~a[3]&~b[3]&sum_check[3]) ? 1'b1 : 1'b0;
+  assign  overflow = (a[3]&b[3]&(~sum_check[3]))|(~a[3]&~b[3]&sum_check[3]);
 
   always_comb 
     case(overflow)
