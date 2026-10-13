@@ -34,5 +34,89 @@ module formula_2_fsm
     // FPGA-Systems Magazine :: FSM :: Issue ALFA (state_0)
     // You can download this issue from https://fpga-systems.org/fsm#state_0
 
+    enum logic [2:0]
+    {
+        st_idle       = 3'd0,
+        st_wait_a_res = 3'd1,
+        st_wait_b_res = 3'd2,
+        st_wait_c_res = 3'd3
+    }
+    state, next_state;
+
+    always_comb
+    begin
+        next_state  = state;
+
+        isqrt_x_vld = '0;
+        isqrt_x     = 'x;  
+
+
+        case (state)
+        st_idle:
+        begin
+            isqrt_x = c;
+
+            if (arg_vld)
+            begin
+                isqrt_x_vld = '1;
+                next_state  = st_wait_c_res;
+            end
+        end
+
+        st_wait_c_res:
+        begin
+            isqrt_x = b + 32' (isqrt_y);
+
+            if (isqrt_y_vld)
+            begin
+                isqrt_x_vld = '1;
+                next_state  = st_wait_b_res;
+            end
+        end
+
+        st_wait_b_res:
+        begin
+            isqrt_x = a + 32' (isqrt_y);
+
+            if (isqrt_y_vld)
+            begin
+                isqrt_x_vld = '1;
+                next_state  = st_wait_a_res;
+            end
+        end
+
+        st_wait_a_res:
+        begin
+            if (isqrt_y_vld)
+            begin
+                next_state = st_idle;
+            end
+        end
+        endcase
+
+
+
+    end
+
+
+
+    always_ff @ (posedge clk)
+        if (rst)
+            state <= st_idle;
+        else
+            state <= next_state;
+
+
+    always_ff @ (posedge clk)
+        if (rst)
+            res_vld <= '0;
+        else
+            res_vld <= (state == st_wait_a_res & isqrt_y_vld);
+
+    always_ff @ (posedge clk)
+        if (state == st_idle)
+            res <= '0;
+        else if (isqrt_y_vld)
+            res <= 32' (isqrt_y);
 
 endmodule
