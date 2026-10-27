@@ -61,5 +61,125 @@ module formula_1_pipe_aware_fsm
     // FPGA-Systems Magazine :: FSM :: Issue ALFA (state_0)
     // You can download this issue from https://fpga-systems.org/fsm#state_0
 
+    enum logic[4:0] {
+        st_idle,
+        st_a,
+        st_b,
+        st_c,
+        st_a_res,
+        st_b_res,
+        st_c_res,
+        st_done
+    }
+    state, new_state;
+
+    logic [15:0] a_sqrt, b_sqrt, c_sqrt;
+
+    always_comb
+    begin
+        new_state = state;
+        isqrt_x_vld = '0;
+        isqrt_x     = '0;
+        res_vld     = '0;
+        res         = '0;
+
+        case(state)
+            st_idle:
+            begin
+                if(arg_vld)
+                begin
+                    new_state = st_a;
+                end
+            end
+
+            st_a:
+            begin
+                isqrt_x_vld = '1;
+                isqrt_x     = a;
+                new_state   = st_b;
+            end
+
+            st_b:
+            begin
+                isqrt_x_vld = '1;
+                isqrt_x     = b;
+                new_state   = st_c;
+            end
+
+            st_c:
+            begin
+                isqrt_x_vld = '1;
+                isqrt_x     = c;
+                new_state   = st_a_res;
+            end
+
+            st_a_res:
+            begin
+                if(isqrt_y_vld)
+                begin
+                    new_state = st_b_res;
+                end
+            end
+
+            st_b_res:
+            begin
+                if(isqrt_y_vld)
+                begin
+                    new_state = st_c_res;
+                end
+            end
+            
+            st_c_res:
+            begin
+                if(isqrt_y_vld)
+                begin
+                    new_state = st_done;
+                end
+            end
+
+            st_done:
+            begin
+                res_vld = 1'b1;
+                res     = 32'(a_sqrt) + 32'(b_sqrt) + 32'(c_sqrt);
+                if (arg_vld)
+                    new_state = st_a;
+                else
+                    new_state = st_idle;
+            end
+    endcase
+    end
+    
+
+    always_ff @(posedge clk) begin
+        if (rst)
+            state <= st_idle;
+        else 
+            state <= new_state;
+    end
+
+    always_ff @(posedge clk) begin
+        if (rst)
+        begin
+            a_sqrt <= '0;
+            b_sqrt <= '0;
+            c_sqrt <= '0;
+        end
+        else 
+        begin
+            if (state == st_a_res && isqrt_y_vld)
+                a_sqrt <= isqrt_y;
+
+            if (state == st_b_res && isqrt_y_vld)
+                b_sqrt <= isqrt_y;
+
+            if (state == st_c_res && isqrt_y_vld)
+                c_sqrt <= isqrt_y;
+
+        end
+    end
+
+
+
+
 
 endmodule

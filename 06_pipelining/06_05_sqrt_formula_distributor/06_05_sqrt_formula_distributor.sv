@@ -1,6 +1,6 @@
 module sqrt_formula_distributor
 # (
-    parameter formula = 1,
+    parameter int formula = 1,
               impl    = 1
 )
 (
@@ -12,8 +12,8 @@ module sqrt_formula_distributor
     input  [31:0] b,
     input  [31:0] c,
 
-    output        res_vld,
-    output [31:0] res
+    output logic       res_vld,
+    output logic [31:0] res
 );
 
     // Task:
@@ -43,5 +43,101 @@ module sqrt_formula_distributor
     // Instantiate sufficient number of "formula_1_impl_1_top", "formula_1_impl_2_top",
     // or "formula_2_top" modules to achieve desired performance.
 
+    localparam NUM_BLOCKS = 50; 
+
+    logic [31:0] a_in  [NUM_BLOCKS];
+    logic [31:0] b_in  [NUM_BLOCKS];
+    logic [31:0] c_in  [NUM_BLOCKS];
+    logic        vld_in [NUM_BLOCKS];
+
+    logic [31:0] res_out [NUM_BLOCKS];
+    logic        vld_out [NUM_BLOCKS];
+
+    logic [5:0] idx; 
+
+    always_ff @(posedge clk) begin
+        if (rst) begin
+            idx <= 0;
+            for (int i = 0; i < NUM_BLOCKS; i++) begin
+                vld_in[i] <= 1'b0;
+                a_in[i]   <= '0;
+                b_in[i]   <= '0;
+                c_in[i]   <= '0;
+            end
+        end
+        else begin
+            for (int i = 0; i < NUM_BLOCKS; i++) begin
+                vld_in[i] <= 1'b0;
+            end
+
+            if (arg_vld) begin
+                a_in[idx]   <= a;      
+                b_in[idx]   <= b;       
+                c_in[idx]   <= c;       
+                vld_in[idx] <= 1'b1;
+
+                if (idx == NUM_BLOCKS - 1)
+                    idx <= 0;
+                else
+                    idx <= idx + 1;
+            end
+        end
+    end
+
+    generate
+        if (formula == 1 && impl == 1) begin : gen_f1_impl_1
+            for (genvar i = 0; i < NUM_BLOCKS; i++) begin : gen_workers
+                formula_1_impl_1_top worker (
+                    .clk(clk), .rst(rst), .arg_vld(vld_in[i]),
+                    .a(a_in[i]), .b(b_in[i]), .c(c_in[i]),
+                    .res_vld(vld_out[i]), .res(res_out[i])
+                );
+            end
+        end
+        else if (formula == 1 && impl == 2) begin : gen_f1_impl_2
+            for (genvar i = 0; i < NUM_BLOCKS; i++) begin : gen_workers
+                formula_1_impl_2_top worker (
+                    .clk(clk), .rst(rst), .arg_vld(vld_in[i]),
+                    .a(a_in[i]), .b(b_in[i]), .c(c_in[i]),
+                    .res_vld(vld_out[i]), .res(res_out[i])
+                );
+            end
+        end
+        else begin : gen_f2
+            for (genvar i = 0; i < NUM_BLOCKS; i++) begin : gen_workers
+                formula_2_top worker (
+                    .clk(clk), .rst(rst), .arg_vld(vld_in[i]),
+                    .a(a_in[i]), .b(b_in[i]), .c(c_in[i]),
+                    .res_vld(vld_out[i]), .res(res_out[i])
+                );
+            end
+        end
+    endgenerate
+    
+    logic        res_vld_c;
+    logic [31:0] res_c;
+
+    always_comb begin
+        res_vld_c = 1'b0;
+        res_c     = '0;
+
+        for (int i = 0; i < NUM_BLOCKS; i++) begin
+            if (vld_out[i] && !res_vld_c) begin 
+                res_vld_c = 1'b1;
+                res_c     = res_out[i];
+            end
+        end
+    end
+
+    always_ff @(posedge clk) begin
+        if (rst) begin
+            res_vld <= 1'b0;
+            res     <= '0;
+        end
+        else begin
+            res_vld <= res_vld_c;
+            res     <= res_c;
+        end
+    end
 
 endmodule

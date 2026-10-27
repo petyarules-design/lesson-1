@@ -11,8 +11,8 @@ module put_in_order
     input  [ n_inputs - 1 : 0 ]
            [ width    - 1 : 0 ] up_data,
 
-    output                      down_vld,
-    output [ width   - 1 : 0 ]  down_data
+    output logic                    down_vld,
+    output logic[ width   - 1 : 0 ]  down_data
 );
 
     // Task:
@@ -29,6 +29,45 @@ module put_in_order
     // Comment:
     // The idea of the block is kinda similar to the "parallel_to_serial" block
     // from Homework 2, but here block should also preserve the output order.
+    
+    logic [ n_inputs - 1 : 0 ][ width - 1 : 0 ] buffer_data;
+    logic [ n_inputs - 1 : 0 ]                   buffer_vld;
+    logic [ 5 : 0 ]                                     ptr;
 
+    always_ff @(posedge clk) begin
+        if(rst)
+        begin
+            buffer_data <= '0;
+            buffer_vld  <= '0;
+            ptr         <= '0;
+            down_vld    <= 1'b0;
+            down_data   <= '0;
+        end
+        else begin
+            down_vld <= 1'b0; 
+
+            for ( int i = 0; i < n_inputs; i++) begin
+                if(up_vlds[i] == 1'b1) begin
+                    buffer_data[i] <= up_data[i];
+                    buffer_vld[i]  <= 1'b1;
+                end
+            end
+            
+            // Выдача
+            if (buffer_vld[ptr] == 1'b1) begin
+                down_vld        <= 1'b1;              
+                down_data       <= buffer_data[ptr];
+                
+                if (~up_vlds[ptr]) begin
+                    buffer_vld[ptr] <= 1'b0;
+                end
+                
+                if (ptr == n_inputs - 1)
+                    ptr <= '0;
+                else
+                    ptr <= ptr + 1'b1;
+            end
+        end
+    end
 
 endmodule
