@@ -29,32 +29,40 @@ module parallel_to_serial
     // Note:
     // Check the waveform diagram in the README for better understanding.
 
-    logic [3:0]              counter;
-    logic [7:0]        stored_data;  
+    logic [3:0]            counter;
+    logic [7:0]        stored_data;
 
     assign serial_valid = parallel_valid | busy;
 
- 
     assign serial_data = busy ? stored_data[0] : (parallel_valid ? parallel_data[0] : 1'b0);
 
     always_ff @(posedge clk) begin
-        if (rst) begin
-            stored_data <= '0;      
+        if (rst)
+            stored_data <= '0;
+        else if (parallel_valid && !busy)
+            stored_data <= parallel_data >> 1;
+        else if (busy)
+            stored_data <= stored_data >> 1;
+    end
+
+    always_ff @(posedge clk) begin
+        if (rst)
             counter <= '0;
+        else if (parallel_valid && !busy)
+            counter <= 1;
+        else if (busy && counter == 7)
+            counter <= '0;
+        else if (busy)
+            counter <= counter + 1;
+    end
+
+    always_ff @(posedge clk) begin
+        if (rst)
             busy <= '0;
-        end
-        else if (parallel_valid && !busy) begin
-            stored_data <= parallel_data >> 1;   
-            counter <= 1;               
-            busy <= 1;       
-        end
-        else if (busy) begin
-            stored_data <= stored_data >> 1; 
-            if (counter == 7)                
-                busy <= 0;
-            else
-                counter <= counter + 1;
-        end
+        else if (parallel_valid && !busy)
+            busy <= 1;
+        else if (busy && counter == 7)
+            busy <= 0;
     end
 
 endmodule
