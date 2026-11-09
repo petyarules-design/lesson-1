@@ -103,7 +103,7 @@ module serial_divisibility_by_5_using_fsm
                   else        new_state = mod_1;
           mod_4 : if(new_bit) new_state = mod_4;
                   else        new_state = mod_3;
-    
+
     endcase
 
     // verilator lint_on CASEINCOMPLETE
@@ -111,7 +111,7 @@ module serial_divisibility_by_5_using_fsm
   end
 
   // Output logic
-  assign div_by_5 = state == mod_0;
+  assign div_by_5 = ( state == mod_0 );
 
   // State update
   always_ff @ (posedge clk)

@@ -126,51 +126,51 @@ module float_discriminant (
     end
 
     f_mult u_b2 (
-        .clk        (clk),
-        .rst        (rst),
-        .a          (b),
-        .b          (b),
+        .clk        (clk     ),
+        .rst        (rst     ),
+        .a          (b       ),
+        .b          (b       ),
         .up_valid   (start_b2),
-        .res        (b2),
-        .down_valid (b2_vld),
-        .busy       (),
-        .error      (b2_err)
+        .res        (b2      ),
+        .down_valid (b2_vld  ),
+        .busy       (        ),
+        .error      (b2_err  )
     );
 
     f_mult u_four_a (
-        .clk        (clk),
-        .rst        (rst),
-        .a          (four),
-        .b          (a),
+        .clk        (clk     ),
+        .rst        (rst     ),
+        .a          (four    ),
+        .b          (a       ),
         .up_valid   (start_fa),
-        .res        (four_a),
-        .down_valid (fa_vld),
-        .busy       (),
-        .error      (fa_err)
+        .res        (four_a  ),
+        .down_valid (fa_vld  ),
+        .busy       (        ),
+        .error      (fa_err  )
     );
 
     f_mult u_four_ac (
-        .clk        (clk),
-        .rst        (rst),
-        .a          (four_a),
-        .b          (c),
+        .clk        (clk      ),
+        .rst        (rst      ),
+        .a          (four_a   ),
+        .b          (c        ),
         .up_valid   (start_fac),
-        .res        (four_ac),
-        .down_valid (fac_vld),
-        .busy       (),
-        .error      (fac_err)
+        .res        (four_ac  ),
+        .down_valid (fac_vld  ),
+        .busy       (         ),
+        .error      (fac_err  )
     );
 
     f_sub u_sub (
-        .clk        (clk),
-        .rst        (rst),
-        .a          (b2),
-        .b          (four_ac),
+        .clk        (clk      ),
+        .rst        (rst      ),
+        .a          (b2       ),
+        .b          (four_ac  ),
         .up_valid   (start_sub),
-        .res        (sub_res),
-        .down_valid (sub_vld),
-        .busy       (),
-        .error      (sub_err)
+        .res        (sub_res  ),
+        .down_valid (sub_vld  ),
+        .busy       (         ),
+        .error      (sub_err  )
     );
 
     assign res          = sub_res;

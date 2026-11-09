@@ -51,7 +51,7 @@ module sort_floats_using_fsm (
     wire [FLEN-1:0]   u1 = uflat[2*FLEN-1 -: FLEN];
     wire [FLEN-1:0]   u2 = uflat[FLEN-1   -: FLEN];
 
-    wire comparing = (state == st_idle && valid_in)
+    wire comparing = ( (state == st_idle) && (valid_in) )
                   || (state == st_comp2)
                   || (state == st_comp3);
 
@@ -135,13 +135,13 @@ module sort_floats_using_fsm (
                 end
             end
 
-            if (state == st_comp2 && ~f_le_err && ~f_le_res)
+            if ( (state == st_comp2) && (~f_le_err) && (~f_le_res) )
             begin
                 x <= z;
                 z <= x;
             end
 
-            if (state == st_comp3 && ~f_le_err)
+            if ( (state == st_comp3) && (~f_le_err) )
             begin
                 sorted[0] <= x;
                 if (f_le_res)

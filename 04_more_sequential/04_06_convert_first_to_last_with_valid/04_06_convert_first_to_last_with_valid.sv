@@ -14,9 +14,9 @@ module conv_first_to_last_no_ready
     input                up_first,
     input  [width - 1:0] up_data,
 
-    output               down_valid,
-    output               down_last,
-    output [width - 1:0] down_data
+    output logic              down_valid,
+    output logic             down_last,
+    output logic [width - 1:0] down_data
 );
     // Task:
     // Implement a module that converts 'first' input status signal
@@ -24,33 +24,34 @@ module conv_first_to_last_no_ready
     //
     // See README for full description of the task with timing diagram.
 
-    logic               valid_reg;
-    logic [width - 1:0] data_reg;
-    logic               last_reg;
+    logic [width - 1:0] data_buf;
+    logic               valid_buf;
 
-    assign down_valid = valid_reg;
-    assign down_data  = data_reg;
-    assign down_last  = up_valid ? up_first : last_reg;
+    always @(posedge clock) begin
+        if (reset) begin
+            data_buf  <= 0;
+            valid_buf <= 0;
 
-    always_ff @(posedge clock) begin
-        if (reset)
-            valid_reg <= 1'b0;
-        else
-            valid_reg <= up_valid;
+            down_valid <= 0;
+            down_last  <= 0;
+            down_data  <= 0;
+        end
+        else begin
+
+            down_valid <= valid_buf && up_valid;
+
+            if (valid_buf && up_valid) begin
+                down_data <= data_buf;
+                down_last <= up_first;
+            end
+            else begin
+                down_last <= 0;
+            end
+
+            if (up_valid) begin
+                data_buf  <= up_data;
+                valid_buf <= 1;
+            end
+        end
     end
-
-    always_ff @(posedge clock) begin
-        if (reset)
-            data_reg <= '0;
-        else
-            data_reg <= up_data;
-    end
-
-    always_ff @(posedge clock) begin
-        if (reset)
-            last_reg <= 1'b0;
-        else if (up_valid)
-            last_reg <= up_first;
-    end
-
 endmodule

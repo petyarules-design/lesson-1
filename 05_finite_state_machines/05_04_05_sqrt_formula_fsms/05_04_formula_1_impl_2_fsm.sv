@@ -63,17 +63,17 @@ module formula_1_impl_2_fsm
             isqrt_1_x = a;
             isqrt_2_x = b;
             if (arg_vld) begin
-                isqrt_1_x_vld = 1'b1;  
-                isqrt_2_x_vld = 1'b1;   
+                isqrt_1_x_vld = 1'b1;
+                isqrt_2_x_vld = 1'b1;
                 next_state    = st_wait_ab;
             end
         end
 
         st_wait_ab:
         begin
-            isqrt_1_x = c;              
+            isqrt_1_x = c;
             if (isqrt_1_y_vld & isqrt_2_y_vld) begin
-                isqrt_1_x_vld = 1'b1;    
+                isqrt_1_x_vld = 1'b1;
                 next_state    = st_wait_c;
             end
         end
@@ -99,9 +99,9 @@ module formula_1_impl_2_fsm
     always_ff @(posedge clk)
         if (state == st_idle)
             res <= '0;
-        else if ((state == st_wait_ab) & isqrt_1_y_vld & isqrt_2_y_vld)
-            res <= 32'(isqrt_1_y) + 32'(isqrt_2_y);  
+        else if ((state == st_wait_ab) & isqrt_1_y_vld && isqrt_2_y_vld)
+            res <= 32'(isqrt_1_y) + 32'(isqrt_2_y);
         else if ((state == st_wait_c) & isqrt_1_y_vld)
-            res <= res + 32'(isqrt_1_y);             
+            res <= res + 32'(isqrt_1_y);
 endmodule
 

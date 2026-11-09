@@ -48,7 +48,7 @@ module formula_2_fsm
         next_state  = state;
 
         isqrt_x_vld = '0;
-        isqrt_x     = 'x;  
+        isqrt_x     = 'x;
 
 
         case (state)
@@ -111,12 +111,12 @@ module formula_2_fsm
         if (rst)
             res_vld <= '0;
         else
-            res_vld <= (state == st_wait_a_res & isqrt_y_vld);
+            res_vld <= ( ( state == st_wait_a_res ) && isqrt_y_vld);
 
     always_ff @ (posedge clk)
         if (state == st_idle)
             res <= '0;
         else if (isqrt_y_vld)
-            res <= 32' (isqrt_y);
+            res <= 32'(isqrt_y);
 
 endmodule
