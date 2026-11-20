@@ -84,10 +84,10 @@ module formula_2_pipe_using_fifos
     logic [31:0] sum1;
     logic        sum1_vld;
 
-    always_comb begin
-        sum1     = b_d + {16'b0, sqrt_c};
-        sum1_vld = b_d_vld & sqrt_c_vld;
-    end
+
+    assign sum1     = (b_d + {16'b0, sqrt_c} );
+    assign sum1_vld = (b_d_vld & sqrt_c_vld );
+
 
     logic        sqrt_sum1_vld;
     logic [15:0] sqrt_sum1;
@@ -127,10 +127,8 @@ module formula_2_pipe_using_fifos
     logic [31:0] sum2;
     logic        sum2_vld;
 
-    always_comb begin
-        sum2     = a_d + {16'b0, sqrt_sum1};
-        sum2_vld = a_d_vld & sqrt_sum1_vld;
-    end
+    assign sum2     = ( a_d + {16'b0, sqrt_sum1} );
+    assign sum2_vld = ( a_d_vld & sqrt_sum1_vld );
 
     logic        res_sqrt_vld;
     logic [15:0] res_sqrt;
@@ -162,7 +160,7 @@ module formula_2_pipe_using_fifos
         .full       (vld_fifo_full       )
     );
 
-    assign res_vld = vld_fifo_full & vld_fifo_out;
+    assign res_vld = ( vld_fifo_full & vld_fifo_out );
     assign res     = {16'b0, res_sqrt};
 
 endmodule
