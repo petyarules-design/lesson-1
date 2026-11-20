@@ -40,34 +40,33 @@ module ff_fifo_with_reg_empty_full
         // Task: Add logic for pop to make the FIFO work
 
         if (pop)
-            rd_ptr_d = rd_ptr_q == max_ptr ? '0 : rd_ptr_q + 1'b1;
+            rd_ptr_d = ( rd_ptr_q == max_ptr ) ? ( '0 ) : ( rd_ptr_q + 1'b1 );
         else
             rd_ptr_d = rd_ptr_q;
 
 
-        case ({ push, pop })
+    case ({ push, pop })
 
         // Example
         2'b10:
         begin
             empty_d = 1'b0;
-            full_d  = wr_ptr_d == rd_ptr_q;
+            full_d  = ( wr_ptr_d == rd_ptr_q );
         end
 
         // Task: Add { push, pop } == 2'b01 case to make the FIFO work
-
         2'b01:
         begin
-            empty = wr_ptr_d == rd_ptr_q;
+            empty_d = ( wr_ptr_q == rd_ptr_d );
             full_d  = 1'b0;
         end
 
         default:
         begin
-            empty_d  = empty;
-            full_d   = full;
+            empty_d = empty;
+            full_d  = full;
         end
-        endcase
+    endcase
     end
 
     //------------------------------------------------------------------------
