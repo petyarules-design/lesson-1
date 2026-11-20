@@ -31,25 +31,25 @@ module ff_fifo_pow2_depth
     //--------------------------------------------------------------------------
 
     // Example
-    always_ff @ (posedge clk or posedge rst)    
+    always_ff @ (posedge clk or posedge rst)
         if (rst)
             ext_wr_ptr <= '0;
         else if (push)
             ext_wr_ptr <= ext_wr_ptr + 1'b1;
 
-    // Task: Add logic for ext_rd_ptr 
+    // Task: Add logic for ext_rd_ptr
 
     //--------------------------------------------------------------------------
     always_ff @ (posedge clk or posedge rst)
-        if (rst)
-            ext_rd_ptr <= '0;
-        else if (pop)
-            ext_rd_ptr <= ext_rd_ptr + 1'b1;
+      if (rst)
+        ext_rd_ptr <= '0;
+      else if (pop)
+        ext_rd_ptr <= ext_rd_ptr + 1'b1;
 
 
     always_ff @ (posedge clk)
-        if (push)
-            data [wr_ptr] <= write_data;
+      if (push)
+        data [wr_ptr] <= write_data;
 
     assign read_data = data [rd_ptr];
 
