@@ -44,8 +44,8 @@ module formula_2_pipe_using_circular
 
     localparam int L = 16;
 
-    wire        sqrt_c_vld;
-    wire [15:0] sqrt_c;
+    logic        sqrt_c_vld;
+    logic [15:0] sqrt_c;
 
     isqrt u_isqrt_1 (
         .clk   (clk       ),
@@ -56,11 +56,13 @@ module formula_2_pipe_using_circular
         .y     (sqrt_c    )
     );
 
+    logic        b_d_vld;
+    logic [31:0] b_d;
 
-    wire        b_d_vld;
-    wire [31:0] b_d;
-
-    circular_buffer_with_valid #(.width(32), .depth(L)) buf_b (
+    circular_buffer_with_valid #(
+        .width(32),
+        .depth(L)
+    ) buf_b (
         .clk       (clk    ),
         .rst       (rst    ),
         .in_valid  (arg_vld),
@@ -69,11 +71,14 @@ module formula_2_pipe_using_circular
         .out_data  (b_d    )
     );
 
-    wire [31:0] sum1     = b_d + {16'b0, sqrt_c};
-    wire        sum1_vld = b_d_vld & sqrt_c_vld;
+    logic        sum1_vld;
+    logic [31:0] sum1;
 
-    wire        sqrt_sum1_vld;
-    wire [15:0] sqrt_sum1;
+    assign sum1_vld = ( b_d_vld & sqrt_c_vld );
+    assign sum1     = ( b_d + {16'b0, sqrt_c} );
+
+    logic        sqrt_sum1_vld;
+    logic [15:0] sqrt_sum1;
 
     isqrt u_isqrt_2 (
         .clk   (clk          ),
@@ -84,10 +89,13 @@ module formula_2_pipe_using_circular
         .y     (sqrt_sum1    )
     );
 
-    wire        a_d_vld;
-    wire [31:0] a_d;
+    logic        a_d_vld;
+    logic [31:0] a_d;
 
-    circular_buffer_with_valid #(.width(32), .depth(2*L)) buf_a (
+    circular_buffer_with_valid #(
+        .width(32),
+        .depth(2*L)
+    ) buf_a (
         .clk       (clk    ),
         .rst       (rst    ),
         .in_valid  (arg_vld),
@@ -96,11 +104,14 @@ module formula_2_pipe_using_circular
         .out_data  (a_d    )
     );
 
-    wire [31:0] sum2     = a_d + {16'b0, sqrt_sum1};
-    wire        sum2_vld = a_d_vld & sqrt_sum1_vld;
+    logic        sum2_vld;
+    logic [31:0] sum2;
 
-    wire        res_sqrt_vld;
-    wire [15:0] res_sqrt;
+    assign sum2_vld = ( a_d_vld & sqrt_sum1_vld );
+    assign sum2     = ( a_d + {16'b0, sqrt_sum1} );
+
+    logic        res_sqrt_vld;
+    logic [15:0] res_sqrt;
 
     isqrt u_isqrt_3 (
         .clk   (clk         ),
@@ -111,9 +122,12 @@ module formula_2_pipe_using_circular
         .y     (res_sqrt    )
     );
 
-    wire res_vld_d;
+    logic res_vld_d;
 
-    circular_buffer_with_valid #(.width(1), .depth(3*L)) buf_vld (
+    circular_buffer_with_valid #(
+        .width(1),
+        .depth(3*L)
+    ) buf_vld (
         .clk       (clk      ),
         .rst       (rst      ),
         .in_valid  (1'b1     ),
@@ -124,8 +138,5 @@ module formula_2_pipe_using_circular
 
     assign res_vld = res_vld_d;
     assign res     = {16'b0, res_sqrt};
-
-    logic _unused_ok = res_sqrt_vld;
-
 
 endmodule
