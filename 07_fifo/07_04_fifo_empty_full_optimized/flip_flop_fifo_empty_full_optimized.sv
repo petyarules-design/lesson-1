@@ -55,23 +55,23 @@ module flip_flop_fifo_empty_full_optimized
     // TODO: Add logic for rd_ptr
 
     always_ff @ (posedge clk or posedge rst)
-        if (rst)
+      if (rst)
+      begin
+        rd_ptr <= '0;
+        rd_ptr_odd_circle <= 1'b0;
+      end
+      else if (pop)
+      begin
+        if (rd_ptr == max_ptr)
         begin
-            rd_ptr <= '0;
-            rd_ptr_odd_circle <= 1'b0;
+          rd_ptr <= '0;
+          rd_ptr_odd_circle <= ~rd_ptr_odd_circle;
         end
-        else if (pop)
+        else
         begin
-            if (rd_ptr == max_ptr)
-            begin
-                rd_ptr <= '0;
-                rd_ptr_odd_circle <= ~rd_ptr_odd_circle;
-            end
-            else
-            begin
-                rd_ptr <= rd_ptr + 1'b1;
-            end
+            rd_ptr <= rd_ptr + 1'b1;
         end
+    end
 
     //------------------------------------------------------------------------
 
@@ -91,6 +91,6 @@ module flip_flop_fifo_empty_full_optimized
 
     // Task: Add logic for full output
 
-    assign full = equal_ptrs & ~same_circle;
+    assign full = ( equal_ptrs & ~same_circle );
 
 endmodule
