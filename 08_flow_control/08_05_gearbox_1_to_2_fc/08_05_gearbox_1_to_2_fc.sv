@@ -34,8 +34,8 @@ module gearbox_1_to_2_fc
     assign down_valid = out_valid;
     assign down_data  = out_data;
 
-    wire up_hs   = up_valid && up_ready;
-    wire down_hs = down_valid && down_ready;
+    logic up_hs   = up_valid && up_ready;
+    logic down_hs = down_valid && down_ready;
 
     always_ff @(posedge clk) begin
         if (rst) begin
