@@ -23,58 +23,52 @@ module double_tokens_with_flow_control
     logic       active, data_r, dup_r, blocked;
     logic [7:0] cnt;
 
-    wire up_hs   = up_valid & up_ready;
-    wire down_hs = down_valid & down_ready;
+    wire up_hs   = up_valid && up_ready;
+    wire down_hs = down_valid && down_ready;
 
     assign down_valid = active;
     assign down_data  = data_r;
-    assign up_ready   = !active & !blocked;
+    assign up_ready   = !active && !blocked;
 
-    always_ff @(posedge clk) begin
-        if (rst) begin
-            active  <= 0;
-            data_r  <= 0;
-            dup_r   <= 0;
-            cnt     <= 0;
+    always_ff @(posedge clk)
+        if (rst)
+            active <= 0;
+        else if (active && down_hs && !dup_r)
+            active <= 0;
+        else if (!active && up_hs)
+            active <= 1;
+
+    always_ff @(posedge clk)
+        if (rst)
+            data_r <= 0;
+        else if (!active && up_hs)
+            data_r <= up_token;
+
+    always_ff @(posedge clk)
+        if (rst)
+            dup_r <= 0;
+        else if (active && down_hs && dup_r)
+            dup_r <= 0;
+        else if (!active && up_hs)
+            dup_r <= up_token;
+
+    always_ff @(posedge clk)
+        if (rst)
+            cnt <= 0;
+        else if (blocked && down_ready)
+            cnt <= 0;
+        else if (!blocked && up_hs)
+            if (!up_token)
+                cnt <= 0;
+            else if (cnt < 8'd100)
+                cnt <= cnt + 1;
+
+    always_ff @(posedge clk)
+        if (rst)
             blocked <= 0;
-        end
-        else
-        begin
-            if (blocked)
-            begin
-                if (down_ready)
-                begin
-                    blocked <= 0;
-                    cnt <= 0;
-                end
-            end
-            else if (up_hs)
-            begin
-                if (!up_token)
-                    cnt <= 0;
-                else if (cnt >= 8'd100)
-                    blocked <= 1;
-                else
-                    cnt <= cnt + 1;
-            end
-
-            if (active)
-            begin
-                if (down_hs)
-                begin
-                    if (dup_r)
-                        dup_r  <= 0;
-                    else
-                        active <= 0;
-                end
-            end
-            else if (up_hs)
-            begin
-                active <= 1;
-                data_r <= up_token;
-                dup_r  <= up_token;
-            end
-        end
-    end
+        else if (blocked && down_ready)
+            blocked <= 0;
+        else if (!blocked && up_hs && up_token && (cnt >= 8'd100))
+            blocked <= 1;
 
 endmodule
