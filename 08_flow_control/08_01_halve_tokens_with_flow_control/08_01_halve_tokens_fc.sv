@@ -40,31 +40,35 @@ module halve_tokens_with_flow_control
     logic in_fire;
 
     assign filtered   = up_token & parity;
-    assign up_ready   = ~buf_valid & up_valid & (down_ready | ~filtered);
+    assign up_ready   = ~buf_valid && up_valid && (down_ready | ~filtered);
 
     assign in_fire    = up_valid & up_ready;
     assign down_valid = buf_valid | in_fire;
     assign down_data  = buf_valid ? buf_data : (in_fire ? filtered : 1'b0);
 
     always_ff @(posedge clk) begin
-        if (rst) begin
-            parity    <= 1'b0;
-            buf_valid <= 1'b0;
-            buf_data  <= 1'b0;
-        end
-        else begin
-            if (in_fire & up_token)
-                parity <= ~parity;
+        if (rst)
+            parity <= 1'b0;
+        else if (in_fire & up_token)
+            parity <= ~parity;
+    end
 
-            if (buf_valid) begin
-                if (down_ready)
-                    buf_valid <= 1'b0;
-            end
-            else if (in_fire & ~down_ready) begin
-                buf_valid <= 1'b1;
-                buf_data  <= filtered;
-            end
+    always_ff @(posedge clk) begin
+        if (rst)
+            buf_valid <= 1'b0;
+        else if (buf_valid) begin
+            if (down_ready)
+                buf_valid <= 1'b0;
         end
+        else if (in_fire & ~down_ready)
+            buf_valid <= 1'b1;
+    end
+
+    always_ff @(posedge clk) begin
+        if (rst)
+            buf_data <= 1'b0;
+        else if (~buf_valid & in_fire & ~down_ready)
+            buf_data <= filtered;
     end
 
 endmodule
