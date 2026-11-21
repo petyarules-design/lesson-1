@@ -38,20 +38,19 @@ module convert_first_to_last_with_flow_control
 
     assign down_last  = reg_valid && up_valid && up_first;
 
-    always_ff @(posedge clock) begin
-        if (reset) begin
+    always_ff @(posedge clock)
+        if (reset)
             reg_valid <= 1'b0;
-            reg_data  <= '0;
-        end
-
-        else if (up_valid && up_ready) begin
+        else if (up_valid && up_ready)
             reg_valid <= 1'b1;
-            reg_data  <= up_data;
-        end
-        else if (down_valid && down_ready) begin
+        else if (down_valid && down_ready)
             reg_valid <= 1'b0;
-        end
-    end
+
+    always_ff @(posedge clock)
+        if (reset)
+            reg_data <= '0;
+        else if (up_valid && up_ready)
+            reg_data <= up_data;
 
 
 endmodule
