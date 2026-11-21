@@ -34,25 +34,26 @@ module gearbox_2_to_1_fc
     assign down_valid = valid;
     assign down_data  = half ? buf_data[width-1:0] : buf_data[2*width-1:width];
 
-    always_ff @(posedge clk or posedge rst) begin
-        if (rst) begin
-            valid    <= 1'b0;
-            half     <= 1'b0;
+    always_ff @(posedge clk or posedge rst)
+        if (rst)
+            valid <= 1'b0;
+        else if (up_valid && up_ready)
+            valid <= 1'b1;
+        else if (down_valid && down_ready && half)
+            valid <= 1'b0;
+
+    always_ff @(posedge clk or posedge rst)
+        if (rst)
+            half <= 1'b0;
+        else if (up_valid && up_ready)
+            half <= 1'b0;
+        else if (down_valid && down_ready && !half)
+            half <= 1'b1;
+
+    always_ff @(posedge clk or posedge rst)
+        if (rst)
             buf_data <= '0;
-        end
-        else begin
-            if (up_valid && up_ready) begin
-                buf_data <= up_data;
-                valid    <= 1'b1;
-                half     <= 1'b0;
-            end
-            else if (down_valid && down_ready) begin
-                if (half)
-                    valid <= 1'b0;
-                else
-                    half  <= 1'b1;
-            end
-        end
-    end
+        else if (up_valid && up_ready)
+            buf_data <= up_data;
 
 endmodule
