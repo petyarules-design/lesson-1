@@ -29,42 +29,41 @@ module gearbox_1_to_2_fc
     logic               out_valid;
     logic [2*width-1:0] out_data;
 
+    logic up_hs;
+    logic down_hs;
+
     assign up_ready   = !out_valid || down_ready;
 
     assign down_valid = out_valid;
     assign down_data  = out_data;
 
-    logic up_hs   = up_valid && up_ready;
-    logic down_hs = down_valid && down_ready;
+    assign up_hs   = up_valid && up_ready;
+    assign down_hs = down_valid && down_ready;
 
-    always_ff @(posedge clk) begin
-        if (rst) begin
-            cnt       <= 1'b0;
-            buf_data  <= '0;
+    always_ff @(posedge clk)
+        if (rst)
+            cnt <= 1'b0;
+        else if (up_hs)
+            cnt <= ~cnt;
+
+    always_ff @(posedge clk)
+        if (rst)
+            buf_data <= '0;
+        else if (up_hs && !cnt)
+            buf_data <= up_data;
+
+    always_ff @(posedge clk)
+        if (rst)
+            out_data <= '0;
+        else if (up_hs && cnt)
+            out_data <= {buf_data, up_data};
+
+    always_ff @(posedge clk)
+        if (rst)
             out_valid <= 1'b0;
-            out_data  <= '0;
-        end
-        else
-        begin
-            if (up_hs)
-            begin
-                if (!cnt) begin
-                    buf_data <= up_data;
-                end
-                else begin
-                    out_data <= {buf_data, up_data};
-                end
-                cnt <= ~cnt;
-            end
-
-            if (up_hs && cnt) begin
-                out_valid <= 1'b1;
-            end
-            else if (down_hs)
-            begin
-                out_valid <= 1'b0;
-            end
-        end
-    end
+        else if (up_hs && cnt)
+            out_valid <= 1'b1;
+        else if (down_hs)
+            out_valid <= 1'b0;
 
 endmodule
