@@ -179,4 +179,5 @@ module float_discriminant (
     assign err          = b2_err | fa_err | fac_err | sub_err;
     assign busy         = (state != st_idle);
 
+
 endmodule
